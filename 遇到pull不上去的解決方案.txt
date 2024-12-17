@@ -1,0 +1,5 @@
+1. git fetch
+2. git merge
+如有遇到奇怪狀況
+:wq
+3.git pull
