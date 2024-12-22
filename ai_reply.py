@@ -1,14 +1,26 @@
-from linebot.models import TextSendMessage
+from openai import ChatCompletion
+import os
+from linebot.models import TextMessage  
 
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
+# AI 回覆處理器
 def handle_ai_reply(event, line_bot_api):
-    text = event.message.text.lower()
-    if "營業時間" in text:
-        reply = "我們的營業時間是每天早上9點到晚上9點。"
-    elif "配送時間" in text:
-        reply = "配送時間約為1-2天，請耐心等候！"
-    elif "聯絡方式" in text:
-        reply = "您可以透過客服專線 0800-123-456 聯繫我們。"
-    else:
-        reply = "抱歉，我不太明白您的問題，可以稍微描述清楚一點嗎？"
-    
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
+    user_message = event.message.text
+
+    try:
+        # 使用 OpenAI API 生成回應
+        response = ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": user_message}],
+            api_key=openai_api_key
+        )
+        reply = response['choices'][0]['message']['content']
+    except Exception as e:
+        reply = f"AI 回覆失敗: {str(e)}"
+
+    # 發送回應給使用者
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextMessage(text=reply) 
+    )
