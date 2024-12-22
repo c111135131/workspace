@@ -1,24 +1,23 @@
+### app.py
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, ImageMessage, TextSendMessage
-
-from database import save_order, init_db
-from admin import get_unprocessed_orders, get_orders_by_date, generate_sales_report
+from linebot.models import MessageEvent, TextMessage
 from ai_reply import handle_ai_reply
+from admin import handle_admin_command
+from database import init_database  # 匯入資料庫初始化函數
 
-# Flask 應用初始化
+# 設定 LINE Bot
 app = Flask(__name__)
+line_bot_api = LineBotApi("your-line-channel-access-token")
+handler = WebhookHandler("your-line-channel-secret")
 
-# LINE Bot 設定
-LINE_CHANNEL_ACCESS_TOKEN = 'YOUR_CHANNEL_ACCESS_TOKEN'
-LINE_CHANNEL_SECRET = 'YOUR_CHANNEL_SECRET'
-line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(LINE_CHANNEL_SECRET)
+# 初始化資料庫
+init_database()
 
-@app.route("/callback", methods=['POST'])
+@app.route("/callback", methods=["POST"])
 def callback():
-    signature = request.headers['X-Line-Signature']
+    signature = request.headers["X-Line-Signature"]
     body = request.get_data(as_text=True)
 
     try:
@@ -26,14 +25,16 @@ def callback():
     except InvalidSignatureError:
         abort(400)
 
-    return 'OK'
+    return "OK"
 
-# 處理文字訊息
 @handler.add(MessageEvent, message=TextMessage)
-def handle_text_message(event):
-    handle_ai_reply(event, line_bot_api)  # 使用 AI 回覆模組處理訊息
+def handle_message(event):
+    user_message = event.message.text.lower()
 
-# 啟動應用
+    if user_message.startswith("admin:"):  # 管理員功能
+        handle_admin_command(event, line_bot_api)
+    else:  # 使用者訊息
+        handle_ai_reply(event, line_bot_api)
+
 if __name__ == "__main__":
-    init_db()  # 初始化資料庫
-    app.run(port=8000)
+    app.run(host="0.0.0.0", port=8000)
