@@ -1,38 +1,26 @@
-import sqlite3
-import matplotlib.pyplot as plt
+from linebot.models import TextMessage
+from database import get_unprocessed_orders, get_sales_report
 
-def get_unprocessed_orders():
-    conn = sqlite3.connect('orders.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM orders WHERE status='待確認'")
-    orders = c.fetchall()
-    conn.close()
-    return orders
+# 管理員指令處理器
+def handle_admin_command(event, line_bot_api):
+    user_message = event.message.text.lower()
 
-def get_orders_by_date(date):
-    conn = sqlite3.connect('orders.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM orders WHERE DATE(created_at) = ?", (date,))
-    orders = c.fetchall()
-    conn.close()
-    return orders
+    if "未處理訂單" in user_message:
+        orders = get_unprocessed_orders()
+        if orders:
+            reply = "\n".join([f"訂單ID: {o['id']}, 商品: {o['item_name']}, 數量: {o['quantity']}" for o in orders])
+        else:
+            reply = "目前沒有未處理的訂單。"
 
-def generate_sales_report(year):
-    conn = sqlite3.connect('orders.db')
-    c = conn.cursor()
-    c.execute("""
-        SELECT strftime('%m', created_at) AS month, SUM(quantity) 
-        FROM orders WHERE strftime('%Y', created_at) = ? GROUP BY month
-    """, (year,))
-    data = c.fetchall()
-    conn.close()
+    elif "銷售報表" in user_message:
+        report = get_sales_report()
+        reply = "\n".join([f"{item}: {quantity}" for item, quantity in report.items()])
 
-    months = [int(row[0]) for row in data]
-    sales = [row[1] for row in data]
+    else:
+        reply = "未知的管理員指令，請輸入 '未處理訂單' 或 '銷售報表'。"
 
-    plt.bar(months, sales)
-    plt.xlabel('Month')
-    plt.ylabel('Total Sales')
-    plt.title(f'Sales Report for {year}')
-    plt.savefig('static/sales_report.png')
-    return 'static/sales_report.png'
+    # 發送回應給管理員
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextMessage(text=reply)
+    )
