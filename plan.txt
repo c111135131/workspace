@@ -1,16 +1,6 @@
-dessert_order_bot/
-│
-├── app.py               # 主程式，處理 Flask 應用邏輯和 LINE Bot 回應
-├── database.py          # 資料庫初始化與操作
-├── admin.py             # 業者功能模組，包括訂單管理與報表生成
-├── ai_reply.py          # AI 回覆功能模組
-├── static/              # 儲存上傳的圖片或生成的報表
-│   └── sales_report.png # 銷售報表圖片 (動態生成)
-└── requirements.txt     # 所需的 Python 套件列表
-
-執行專案的步驟
-1.安裝所需套件：pip install -r requirements.txt(如果不行就一個一個裝)
-2.啟動 Flask 應用： python app.py
-3.使用 ngrok 暴露端口： ngrok http 8000
-4.配置 LINE Bot：在 LINE Developer 設定 Webhook URL 為 ngrok 提供的 HTTPS URL。
-5.測試功能：使用 LINE App 與 Bot 互動，測試訂單功能和 AI 回覆。
+app.py - 主程式，負責處理 LINE Webhook 和整體流程。
+ai_reply.py - AI 回覆模組，使用 OpenAI GPT 回覆非訂單相關問題。
+admin.py - 業者功能模組，用於查詢未處理訂單和銷售報表。
+database.py - 資料庫模組，包含資料庫初始化和查詢邏輯。
+init_db.py - 初始化資料庫腳本（僅需執行一次）。
+requirements.txt - 相依套件的清單，方便環境建置。
