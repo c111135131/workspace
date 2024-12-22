@@ -1,6 +1,5 @@
-
 flask
 line-bot-sdk
 openai
+dotenv
 sqlite3
-matplotlib
