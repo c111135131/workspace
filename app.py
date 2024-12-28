@@ -6,11 +6,15 @@ from linebot.models import MessageEvent, TextMessage
 from ai_reply import handle_ai_reply
 from admin import handle_admin_command
 from database import init_database  # 匯入資料庫初始化函數
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # 設定 LINE Bot
 app = Flask(__name__)
-line_bot_api = LineBotApi("your-line-channel-access-token")
-handler = WebhookHandler("your-line-channel-secret")
+line_bot_api = LineBotApi(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))
+handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET'))
 
 # 初始化資料庫
 init_database()
@@ -37,4 +41,4 @@ def handle_message(event):
         handle_ai_reply(event, line_bot_api)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=5000)

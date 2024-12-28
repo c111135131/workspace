@@ -1,4 +1,5 @@
-# pip install dotenv
-# from dotenv import load_dotenv
-# load_dotenv()
-API_KEY="YOUR GEMINI API_KEY"
+# 將檔名的"example"刪除；填入你的金鑰
+OPENAI_API_KEY= your-openai-api-key
+OPENAI_ENTPOINT= your-openai-entpoint
+LINE_CHANNEL_ACCESS_TOKEN= your-line-channel-access-token
+LINE_CHANNEL_SECRET= your-line-channel-secret

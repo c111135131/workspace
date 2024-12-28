@@ -1,4 +1,7 @@
 app.py - 主程式，負責處理 LINE Webhook 和整體流程。
+(有使用者/管理者區分;
+需修改劃分訊息類型，目前只有ai回覆
+)
 ai_reply.py - AI 回覆模組，使用 OpenAI GPT 回覆非訂單相關問題。
 admin.py - 業者功能模組，用於查詢未處理訂單和銷售報表。
 database.py - 資料庫模組，包含資料庫初始化和查詢邏輯。

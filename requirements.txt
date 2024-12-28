@@ -3,3 +3,4 @@ line-bot-sdk
 openai
 dotenv
 sqlite3
+database

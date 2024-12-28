@@ -1,26 +1,51 @@
-from openai import ChatCompletion
+from openai import AzureOpenAI
 import os
+from dotenv import load_dotenv
 from linebot.models import TextMessage  
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
+load_dotenv()
 
-# AI 回覆處理器
 def handle_ai_reply(event, line_bot_api):
+
     user_message = event.message.text
 
-    try:
-        # 使用 OpenAI API 生成回應
-        response = ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": user_message}],
-            api_key=openai_api_key
-        )
-        reply = response['choices'][0]['message']['content']
-    except Exception as e:
-        reply = f"AI 回覆失敗: {str(e)}"
+    endpoint = os.getenv('OPENAI_ENTPOINT')
+    key = os.getenv('OPENAI_API_KEY')  # Your API key
+
+    print(endpoint, key)
+    model_name = "gpt-35-turbo"  # Your model name
+
+    client = AzureOpenAI(
+        azure_endpoint=endpoint,
+        api_version="2024-08-01-preview",
+        api_key=key
+    )
+
+    completion = client.chat.completions.create(
+        model=model_name,
+        # seed=42,
+        # temperature = 1.0,
+        # max_tokens =150, 
+        messages=[
+             {
+		        "role": "assistant",
+		        "content": "你是一個甜點店的老闆；先確認客人訂單，禮貌回覆訊息；"
+	        },
+
+            {
+                "role": "user",
+                "content": user_message,  # Your question can go here
+            },
+        ],
+    )
+
+    print(reply)
+    reply = completion.choices[0].message.content
 
     # 發送回應給使用者
     line_bot_api.reply_message(
         event.reply_token,
         TextMessage(text=reply) 
     )
+
+
