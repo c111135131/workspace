@@ -4,3 +4,4 @@ openai
 dotenv
 sqlite3
 database
+matplotlib
