@@ -12,7 +12,7 @@ def handle_ai_reply():
     key = os.getenv('OPENAI_API_KEY')  # Your API key
 
     print(endpoint, key)
-    model_name = "gpt-35-turbo"  # Your model name
+    model_name = "gpt-4-32k"  # Your model name
 
     client = AzureOpenAI(
         azure_endpoint=endpoint,
@@ -22,9 +22,9 @@ def handle_ai_reply():
 
     completion = client.chat.completions.create(
         model=model_name,
-        # seed=42,
-        # temperature = 1.0,
-        # max_tokens =150, 
+        seed=42,
+        temperature = 1.0,
+        max_tokens =150, 
         messages=[
              {
 		        "role": "assistant",

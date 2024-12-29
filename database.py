@@ -1,6 +1,7 @@
 import sqlite3
 import matplotlib.pyplot as plt
-from datetime import datetime
+from datetime import datetime, timedelta
+import os
 
 def init_database():
     conn = sqlite3.connect("orders.db")
@@ -22,7 +23,7 @@ def init_database():
             ClientId INTEGER NOT NULL,
             ItemName TEXT NOT NULL,
             Quantity INTEGER NOT NULL,
-            Date TIME NOT NULL,
+            Date TEXT NOT NULL,
             Status TEXT NOT NULL DEFAULT 'pending',
             FOREIGN KEY (ClientId) REFERENCES clients (ClientId)
         );
@@ -31,12 +32,17 @@ def init_database():
     conn.commit()
     conn.close()
 
-
-# 獲取未處理訂單
 def get_unprocessed_orders():
     conn = sqlite3.connect("orders.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT OrderId, ClientId, ItemName, Quantity FROM orders WHERE Status = 'pending' ORDER BY Date")
+    cursor.execute('''
+        SELECT OrderId As 訂單編號, 
+        ClientName As 客戶名稱, 
+        GROUP_CONCAT(CONCAT(ItemName, '*', Quantity) SEPARATOR ', ') AS 商品明細
+        FROM orders JOIN clients ON orders.ClientId = clients.ClientId 
+        WHERE Status = 'pending' 
+        ORDER BY Date;
+    ''')
     orders = [
         {"OrderId": row[0], "ClientId": row[1], "ItemName": row[2], "Quantity": row[3]} 
         for row in cursor.fetchall()
@@ -44,39 +50,55 @@ def get_unprocessed_orders():
     conn.close()
     return orders
 
+# 獲取前一個月的 "YYYY-MM" 格式
+def get_previous_month():
+    today = datetime.today()
+    first = today.replace(day=1)
+    previous_month = first - timedelta(days=1)
+    return previous_month.strftime("%Y-%m")
+
+# 獲取前一個月的銷售報告
 def get_monthly_sales_report():
+    previous_month = get_previous_month()
     conn = sqlite3.connect("orders.db")
     cursor = conn.cursor()
-    # 查詢每一天的銷售數量，按日期分組
     cursor.execute("""
-        SELECT Date, SUM(Quantity) 
-        FROM orders 
-        WHERE strftime('%Y-%m', Date) = strftime('%Y-%m', 'now')  -- 只查詢當月數據
-        GROUP BY Date
-        ORDER BY Date
-    """)
+        SELECT DATE(Date), SUM(Quantity)
+        FROM orders
+        WHERE strftime('%Y-%m', Date) = ?
+        GROUP BY DATE(Date)
+        ORDER BY DATE(Date)
+    """, (previous_month,))
     report = cursor.fetchall()
     conn.close()
     
-    # 組織數據以便繪製
     dates = [datetime.strptime(row[0], "%Y-%m-%d").date() for row in report]
     quantities = [row[1] for row in report]
     
     return dates, quantities
 
-# 繪製銷售折線圖
-def plot_sales_line_chart():
-    dates, quantities = get_monthly_sales_report()
-    
-    # 畫圖
-    plt.figure(figsize=(10, 6))
-    plt.plot(dates, quantities, marker='o', color='b', linestyle='-', linewidth=2, markersize=5)
-    plt.title("Monthly Sales Report", fontsize=16)
-    plt.xlabel("Date", fontsize=12)
-    plt.ylabel("Sales Quantity", fontsize=12)
-    plt.xticks(rotation=45)
-    plt.grid(True)
-    
-    # 顯示圖表
-    plt.tight_layout()
-    plt.savefig("image/monthly_sales_report.png")
+def get_completedOrder_client(order_id):
+    conn = sqlite3.connect('orders.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ClientId
+        FROM orders
+        WHERE id = ?
+    """, (order_id,))
+    client_id = cursor.fetchone()
+    conn.close()
+    return client_id[0] if client_id else None
+
+def mark_order_as_completed(order_id):
+    conn = sqlite3.connect('orders.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE orders
+        SET status = 'completed'
+        WHERE id = ?
+    """, (order_id,))
+    conn.commit()
+    conn.close()
+
+
+
