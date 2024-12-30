@@ -11,7 +11,7 @@ user_sessions = {}
 def handle_admin_command(event, line_bot_api):
     user_message = event.message.text.lower()
     user_id = event.source.user_id  # 確保每個管理員的指令對應到正確的會話
-    server = 'https://0b53-2402-7500-a72-1a93-cc07-44f9-d03a-fed4.ngrok-free.app'
+    server = os.getenv('SERVER_URL')
 
     # 管理員會話狀態管理
     if user_id in user_sessions:
@@ -103,7 +103,7 @@ def prompt_for_order_id(event, line_bot_api):
     uncompleted_orders = get_unprocessed_orders()
     if uncompleted_orders:
         reply = "未完成的訂單如下:\n"
-        reply += "\n".join([f"訂單ID: {o['訂單編號']}, 客戶名稱: {o['客戶名稱']}, 商品明細: {o['商品明細']}" for o in uncompleted_orders])
+        reply += "\n".join([f"訂單ID: {o['訂單編號']}, 客戶名稱: {o['客戶名稱']}, 客戶電話: {o['客戶電話']}, 商品明細: {o['商品明細']}" for o in uncompleted_orders])
         reply += "\n請回覆要標記為完成的訂單ID。"
         # 設置會話狀態為等待訂單ID
         user_sessions[event.source.user_id] = "waiting_for_order_id"

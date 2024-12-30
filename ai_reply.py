@@ -1,13 +1,11 @@
 from openai import AzureOpenAI
 import os
 from dotenv import load_dotenv
-from linebot.models import TextMessage  
+
 
 load_dotenv()
 
-def handle_customer_service(event, line_bot_api):
-
-    user_message = event.message.text
+def handle_customer_service(user_message):
 
     endpoint = os.getenv('OPENAI_ENTPOINT')
     key = os.getenv('OPENAI_API_KEY')  # Your API key
@@ -76,13 +74,4 @@ def handle_customer_service(event, line_bot_api):
         ],
     )
 
-
-    reply = completion.choices[0].message.content
-    print(reply)
-
-    # 發送回應給使用者
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextMessage(text=reply) 
-    )
-
+    return completion.choices[0].message.content
