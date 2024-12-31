@@ -1,0 +1,7 @@
+# 將檔名的"example"刪除；填入你的金鑰
+OPENAI_API_KEY= your-openai-api-key
+OPENAI_ENTPOINT= your-openai-entpoint
+LINE_CHANNEL_ACCESS_TOKEN= your-line-channel-access-token
+LINE_CHANNEL_SECRET= your-line-channel-secret
+SERVER_URL = your-server_url
+ADMIN_ID = your-line-userId #不是LINE ID!
