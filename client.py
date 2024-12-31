@@ -1,8 +1,6 @@
-import re
 from linebot.models import *
 from database import check_clientId, save_user_to_database
 from ai_reply import handle_customer_service
-import os
 from dotenv import load_dotenv
 from utils import validate_phone_number, request_name_and_phone,show_menu, ask_quantity,confirm_order
 
@@ -23,17 +21,35 @@ def handle_client_message(event, line_bot_api):
                 print(orders)
             else:
                 line_bot_api.reply_message(event.reply_token, TextMessage(text="請輸入正確的數字作為數量。"))
+
         elif "線上訂購" in user_message:
-            show_menu(event, line_bot_api)
+            show_menu(event, line_bot_api) 
+
         elif user_message in ["草莓奶油蛋糕", "巧克力慕斯", "芒果椰漿布丁", "檸檬塔"]:
             ask_quantity(event, line_bot_api, user_id, user_message, orders)
+
+        elif "新品推薦" in user_message:
+            reply = "新品推薦"
+            line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
+
+        elif "熱門甜點" in user_message:
+            reply = "熱門甜點"
+            line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
+
+        elif "菜單資訊" in user_message:
+            reply = "菜單資訊"
+            line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
+
         else:
             reply = handle_customer_service(user_message)
             line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
+
     else:
+
         if user_id not in user_data:
             request_name_and_phone(event, line_bot_api, user_id, user_data)
         else:
+
             if user_data[user_id]["waiting_for"] == "name":
                 user_data[user_id]["name"] = user_message
                 user_data[user_id]["waiting_for"] = "phone"
