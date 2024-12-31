@@ -1,7 +1,4 @@
 import requests
-from dotenv import load_dotenv
-import os
-load_dotenv()
 
 def delete_richMenu(richmenu_id,CHANNEL_ACCESS_TOKEN):
   url = f'https://api.line.me/v2/bot/richmenu/{richmenu_id}'

@@ -18,7 +18,7 @@ def init_database():
         # 創建 orders 表
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS orders (
-                OrderId INTEGER PRIMARY KEY AUTOINCREMENT,
+                OrderId INTEGER PRIMARY KEY,
                 ClientId INTEGER NOT NULL,
                 ItemName TEXT NOT NULL,
                 Quantity INTEGER NOT NULL,
@@ -164,6 +164,19 @@ def save_user_to_database(ClientId, Name, Phone):
     finally:
         conn.close()
 
+def save_order_to_db(OrderId, ClientId, orders):
+    conn = sqlite3.connect('orders.db')
+    cursor = conn.cursor()
 
+    # 當前日期時間
+    date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-
+    # 插入訂單資料
+    for order in orders:
+        cursor.execute('''
+            INSERT INTO orders (OrderId, ClientId, ItemName, Quantity, Date, Status)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (OrderId, ClientId, order['item'], order['quantity'], date, 'pending'))
+    
+    conn.commit()
+    conn.close()

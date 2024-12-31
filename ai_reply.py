@@ -2,7 +2,6 @@ from openai import AzureOpenAI
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 def handle_customer_service(user_message):
