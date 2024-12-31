@@ -1,12 +1,14 @@
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage
+from linebot.models import *
 from client import handle_client_message
 from admin import handle_admin_command
 from database import init_database  # 匯入資料庫初始化函數
 from dotenv import load_dotenv
 import os
+from utils import handle_postback
+from client import orders
 
 app = Flask(__name__)
 
@@ -45,6 +47,10 @@ def handle_message(event):
     else:  # 使用者訊息
         handle_client_message(event, line_bot_api)
 
+@handler.add(PostbackEvent)
+def handle_postback_event(event):
+    handle_postback(event, line_bot_api,orders)
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 

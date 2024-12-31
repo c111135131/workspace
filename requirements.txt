@@ -7,7 +7,6 @@ line-bot-sdk
 matplotlib
 flask
 re
-io
 openai
 random
 sqlite3
