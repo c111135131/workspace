@@ -6,25 +6,38 @@ import qrcode
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+
 '''Admin.py'''
 
 # 處理標記訂單為完成
-def handle_order_completion(user_message, user_id, event, line_bot_api,user_sessions):
+def handle_order_completion(user_message, user_id, event, line_bot_api, user_sessions):
     try:
-        order_id = user_message  # 嘗試將訊息轉為訂單ID
-        client_id = get_completedOrder_client(order_id)
-        if client_id:
-            mark_order_as_completed(order_id)
-            line_bot_api.push_message(
-                client_id,
-                TextMessage(text=f"您的訂單 {order_id} 已完成，請到店取貨並付款。")
-            )
-            reply = f"訂單 {order_id} 已標記為完成並通知用戶。"
-            user_sessions.pop(user_id)  # 結束此次會話
+        # 驗證是否為有效的訂單ID（英文字母加數字）
+        if re.match(r"^[A-Za-z0-9]+$", user_message):  # 假設ID僅由英文字母與數字組成
+            order_id = user_message
+            client_id = get_completedOrder_client(order_id)
+            
+            if client_id:
+                # 標記訂單為完成並通知客戶
+                mark_order_as_completed(order_id)
+                line_bot_api.push_message(
+                    client_id,
+                    TextMessage(text=f"您的訂單 {order_id} 已完成，請到店取貨並付款。")
+                )
+                reply = f"訂單 {order_id} 已標記為完成並通知用戶。"
+                user_sessions.pop(user_id, None)  # 清除會話狀態
+            else:
+                reply = f"訂單 {order_id} \n不存在或已完成。請確認輸入的ID。"
+        elif user_message.strip().lower() == "取消":
+            # 處理用戶取消操作
+            user_sessions.pop(user_id, None)  # 清除會話狀態
+            reply = "操作已取消。"
         else:
-            reply = f"訂單 {order_id} 不存在或已完成。請輸入有效的訂單ID。"
-    except ValueError:
-        reply = "請提供有效的訂單ID。"
+            reply = "請提供有效的訂單ID或輸入「取消」以退出操作。"
+    except Exception as e:
+        # 捕捉其他可能的錯誤
+        reply = f"發生錯誤：{str(e)}"
+
     line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
 
 # 顯示未處理訂單
@@ -82,7 +95,7 @@ def prompt_for_order_id(event, line_bot_api,user_sessions):
     if uncompleted_orders:
         reply = "未完成的訂單如下:\n\n"
         reply += "\n\n".join([f"訂單ID: {o['訂單編號']}, \n客戶名稱: {o['客戶名稱']}, \n客戶電話: {o['客戶電話']}, \n商品明細: {o['商品明細']}" for o in uncompleted_orders])
-        reply += "\n\n請回覆要標記為完成的訂單ID。"
+        reply += "\n\n請回覆要標記為完成的訂單ID。\n若不想繼續，請輸入「取消」。"
         # 設置會話狀態為等待訂單ID
         user_sessions[event.source.user_id] = "waiting_for_order_id"
     else:
@@ -93,6 +106,7 @@ def prompt_for_order_id(event, line_bot_api,user_sessions):
 def reply_unknown_command(event, line_bot_api):
     reply = "未知的管理員指令，請輸入 '未處理訂單' 或 '銷售報表' 或 '發送完成訂單通知'。"
     line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
+
 
 '''Client.py'''
 
@@ -182,17 +196,16 @@ def handle_postback(event, line_bot_api,orders):
         order = orders.pop(user_id)
         item = order["item"]
         quantity = order["quantity"]
-        num = str(random.randint(111*11,12345**9))
-        orderId = user_id + num
-        print(orderId)
-        save_order_to_db(orderId, user_id, item, quantity)
+        # num = str(random.randint(111*11,12345**9))
+        # orderId = user_id + num
+        save_order_to_db(user_id, item, quantity)
         
         # 生成 QR Code
-        qr = qrcode.QRCode()
-        qr.add_data(f"訂單號碼：{orderId}")
-        qr.make()
-        img = qr.make_image(fill_color="black", back_color="white")
-        img.save('image/generated_qr_code.png', format="PNG")
+        # qr = qrcode.QRCode()
+        # qr.add_data(f"訂單號碼：{orderId}")
+        # qr.make()
+        # img = qr.make_image(fill_color="black", back_color="white")
+        # img.save('image/generated_qr_code.png', format="PNG")
         server = os.getenv('SERVER_URL')
         
         line_bot_api.reply_message(

@@ -1,5 +1,4 @@
 from linebot.models import *
-from database import get_unprocessed_orders, get_monthly_sales_report, get_completedOrder_client, mark_order_as_completed 
 import os
 from utils import handle_order_completion,show_unprocessed_orders,show_sales_report,prompt_for_order_id,reply_unknown_command
 

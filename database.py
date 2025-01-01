@@ -1,6 +1,8 @@
 import sqlite3
 from datetime import datetime, timedelta
 
+import sqlite3
+
 def init_database():
     try:
         conn = sqlite3.connect("orders.db")
@@ -13,6 +15,19 @@ def init_database():
                 Name TEXT NOT NULL,
                 Phone TEXT NOT NULL
             );
+        ''')
+
+        # 創建 OrderIdSequence 表用於自增值儲存
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS OrderIdSequence (
+                CurrentId INTEGER NOT NULL
+            );
+        ''')
+
+        # 初始化序列值，若不存在則設為 11110
+        cursor.execute('''
+            INSERT OR IGNORE INTO OrderIdSequence (CurrentId)
+            VALUES (11110);
         ''')
 
         # 創建 orders 表
@@ -28,7 +43,26 @@ def init_database():
             );
         ''')
 
+        # 創建觸發器自動生成 OrderId
+        cursor.execute('''
+            CREATE TRIGGER IF NOT EXISTS GenerateOrderId
+            BEFORE INSERT ON orders
+            FOR EACH ROW
+            WHEN NEW.OrderId IS NULL
+            BEGIN
+                -- 更新 CurrentId
+                UPDATE OrderIdSequence SET CurrentId = CurrentId + 1;
+                
+                -- 獲取新的 OrderId
+                SELECT 'ORD' || CurrentId FROM OrderIdSequence;
+                
+                -- 將生成的 OrderId 賦值給 NEW.OrderId
+                UPDATE orders SET OrderId = 'ORD' || (SELECT CurrentId FROM OrderIdSequence) WHERE rowid = NEW.rowid;
+            END;
+        ''')
+
         conn.commit()
+        print("Database initialized successfully.")
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
     finally:
@@ -107,7 +141,7 @@ def get_completedOrder_client(order_id):
         cursor.execute("""
             SELECT ClientId
             FROM orders
-            WHERE id = ?
+            WHERE OrderId = ?
         """, (order_id,))
         client_id = cursor.fetchone()
         return client_id[0] if client_id else None
@@ -124,7 +158,7 @@ def mark_order_as_completed(order_id):
         cursor.execute("""
             UPDATE orders
             SET status = 'completed'
-            WHERE id = ?
+            WHERE OrderId = ?
         """, (order_id,))
         conn.commit()
     except sqlite3.Error as e:
@@ -164,16 +198,16 @@ def save_user_to_database(ClientId, Name, Phone):
     finally:
         conn.close()
 
-def save_order_to_db(OrderId, ClientId, item, quantity):
+def save_order_to_db(ClientId, item, quantity):
     conn = sqlite3.connect('orders.db')
     cursor = conn.cursor()
     # 當前日期時間
     date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     cursor.execute('''
-        INSERT INTO orders (OrderId, ClientId, ItemName, Quantity, Date, Status)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (OrderId, ClientId, item, quantity, date, 'pending'))
+        INSERT INTO orders (ClientId, ItemName, Quantity, Date, Status)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (ClientId, item, quantity, date, 'pending'))
     
     conn.commit()
     conn.close()

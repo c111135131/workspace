@@ -40,10 +40,10 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     userId = event.source.user_id
-    print(f'您的管理者ID為:{userId}')
+    # print(f'您的管理者ID為:{userId}')
     ADMIN_ID = os.getenv('ADMIN_ID')
 
-    if re.match(userId,ADMIN_ID):  # 管理員功能，測試成功再改，改用os.getenv
+    if re.match(userId,ADMIN_ID):  # 管理員功能
         handle_admin_command(event, line_bot_api)
         
     else:  # 使用者訊息
