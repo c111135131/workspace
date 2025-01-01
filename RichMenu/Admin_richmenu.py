@@ -114,4 +114,4 @@ else:
 
 
 #刪除
-delete_richMenu(richmenu_id, CHANNEL_ACCESS_TOKEN)
+# delete_richMenu(richmenu_id, CHANNEL_ACCESS_TOKEN)

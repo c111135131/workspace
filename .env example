@@ -4,4 +4,5 @@ OPENAI_ENTPOINT= your-openai-entpoint
 LINE_CHANNEL_ACCESS_TOKEN= your-line-channel-access-token
 LINE_CHANNEL_SECRET= your-line-channel-secret
 SERVER_URL = your-server_url
-ADMIN_ID = your-line-userId #不是LINE ID!
+ADMIN_ID = your-line-userId #不是LINE ID! 輸入你自己的userLineuserID，即可使用業者端admin.py操作，
+# 再到/RichMenu/Admin_richmenu.py 即可看見業者端操作介面
