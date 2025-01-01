@@ -178,24 +178,25 @@ def handle_postback(event, line_bot_api,orders):
         item = order["item"]
         quantity = order["quantity"]
         save_order_to_db(user_id, item, quantity)
-        
+        order_id = select_OrderId()
+
         # 生成 QR Code
-        # qr = qrcode.QRCode()
-        # qr.add_data(f"訂單號碼：{orderId}")
-        # qr.make()
-        # img = qr.make_image(fill_color="black", back_color="white")
-        # img.save('image/generated_qr_code.png', format="PNG")
+        qr = qrcode.QRCode()
+        qr.add_data(f"訂單號碼：{order_id}")
+        qr.make()
+        img = qr.make_image(fill_color="black", back_color="white")
+        img.save('image/generated_qr_code.png', format="PNG")
+
         server = os.getenv('SERVER_URL')
         
         line_bot_api.reply_message(
             event.reply_token,
             [
                 TextMessage(text="感謝您的訂購！"),
-                ImageSendMessage(original_content_url=f"{server}/generated_qr_code.png", preview_image_url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Desserts.jpg/640px-Desserts.jpg")
+                ImageSendMessage(original_content_url=f"{server}/generated_qr_code.png", preview_image_url="https://i.pinimg.com/736x/50/13/99/50139921790b3209ea94e60a6d940745.jpg")
             ]
         )
         ADMIN_ID = os.getenv('ADMIN_ID')  # 請替換為實際的 admin 用戶 ID
-        order_id = select_OrderId()
         admin_message = f"新訂單通知！\n訂單號碼：{order_id}\n品項：{item}\n數量：{quantity}"
         line_bot_api.push_message(ADMIN_ID, TextSendMessage(text=admin_message))
 

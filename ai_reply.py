@@ -21,8 +21,8 @@ def handle_customer_service(user_message):
     completion = client.chat.completions.create(
         model=model_name,
         seed=42,
-        temperature = 0.7,
-        max_tokens =100, 
+        temperature = 1.0,
+        max_tokens =150, 
         messages=[
              {
 		        "role": "system",
@@ -61,6 +61,9 @@ def handle_customer_service(user_message):
                 9. **退換貨政策**  
                 - 甜點屬於易腐商品，一經售出，除產品有明顯品質問題外，恕不接受退換。  
                 - 如有問題，請於取貨後 **2 小時內**聯繫我們，並提供憑證。
+
+                10. **甜點店地址**
+                - 高雄市燕巢區深中路58號
 
                 依照客人使用的語言回覆
                 """
