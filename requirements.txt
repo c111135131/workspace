@@ -8,7 +8,6 @@ matplotlib
 flask
 re
 openai
-random
 sqlite3
 datetime
 qrcode

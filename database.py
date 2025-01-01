@@ -211,3 +211,22 @@ def save_order_to_db(ClientId, item, quantity):
     
     conn.commit()
     conn.close()
+
+def select_OrderId():
+    conn = sqlite3.connect('orders.db')
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+        SELECT OrderId 
+        FROM orders 
+        ORDER BY Date DESC 
+        LIMIT 1;
+        ''')
+        
+        result = cursor.fetchone()
+
+        return result[0] if result else None
+
+    finally:
+        conn.close()

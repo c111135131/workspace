@@ -1,7 +1,6 @@
 from linebot.models import *
 import re
-import random
-from database import get_completedOrder_client,mark_order_as_completed,get_unprocessed_orders,get_monthly_sales_report,save_order_to_db
+from database import get_completedOrder_client,mark_order_as_completed,get_unprocessed_orders,get_monthly_sales_report,save_order_to_db,select_OrderId
 import qrcode
 import os
 import pandas as pd
@@ -44,26 +43,8 @@ def handle_order_completion(user_message, user_id, event, line_bot_api, user_ses
 def show_unprocessed_orders(event, line_bot_api, server):
     orders = get_unprocessed_orders()
     if orders:
-        os.makedirs("image", exist_ok=True)
-        df = pd.DataFrame(orders)
-        # 設定表格樣式
-        fig, ax = plt.subplots(figsize=(10, len(df) * 0.5 + 1))
-        ax.axis('tight')
-        ax.axis('off')
-        table = ax.table(cellText=df.values, colLabels=df.columns, cellLoc='center', loc='center')
-        table.auto_set_font_size(False)
-        table.set_fontsize(12)
-        table.scale(1.2, 1.2)
-        # 保存表格為圖片
-        image_path = 'image/unprocessed_orders.png'
-        plt.savefig(image_path, bbox_inches='tight', pad_inches=0.1)
-        plt.close(fig)
-        # 發送圖片消息
-        image_message = ImageSendMessage(
-            original_content_url=f'{server}/image/unprocessed_orders.png',
-            preview_image_url=f'{server}/image/unprocessed_orders.png'
-        )
-        line_bot_api.reply_message(event.reply_token, image_message)
+        reply = "\n\n".join([f"訂單ID: {o['訂單編號']}, \n客戶名稱: {o['客戶名稱']}, \n客戶電話: {o['客戶電話']}, \n商品明細: {o['商品明細']}" for o in orders])
+        line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
     else:
         reply = "目前沒有未處理的訂單。"
         line_bot_api.reply_message(event.reply_token, TextMessage(text=reply))
@@ -196,8 +177,6 @@ def handle_postback(event, line_bot_api,orders):
         order = orders.pop(user_id)
         item = order["item"]
         quantity = order["quantity"]
-        # num = str(random.randint(111*11,12345**9))
-        # orderId = user_id + num
         save_order_to_db(user_id, item, quantity)
         
         # 生成 QR Code
@@ -216,7 +195,8 @@ def handle_postback(event, line_bot_api,orders):
             ]
         )
         ADMIN_ID = os.getenv('ADMIN_ID')  # 請替換為實際的 admin 用戶 ID
-        admin_message = f"新訂單通知！\n訂單號碼：{orderId}\n品項：{item}\n數量：{quantity}"
+        order_id = select_OrderId()
+        admin_message = f"新訂單通知！\n訂單號碼：{order_id}\n品項：{item}\n數量：{quantity}"
         line_bot_api.push_message(ADMIN_ID, TextSendMessage(text=admin_message))
 
     elif data == "cancel_order":
