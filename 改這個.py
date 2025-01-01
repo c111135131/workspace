@@ -40,8 +40,8 @@ def handle_message(event):
     #從這裡開始改!!!!!
     if re.match('新品推薦', message):
         imagemap_message = ImagemapSendMessage(
-            base_url=f'{server}/image/你的圖片.jpg',  # 图片的基本 URL，指向新品推薦的图片
-            alt_text='新品推薦',  # 当图片无法显示时的替代文本
+            base_url=f'{server}/image/richMenu.jpg',  # 图片的基本 URL，指向新品推薦的图片
+            alt_text='草莓奶油蛋糕 - NT$150  新鮮草莓搭配香濃奶油，輕盈的蛋糕層次口感，讓你一口接一口。',  # 当图片无法显示时的替代文本
             base_size=BaseSize(height=1040, width=1040), 
             actions=[
                 MessageImagemapAction(
@@ -57,12 +57,12 @@ def handle_message(event):
     #以此類推改下來
     elif re.match('熱門甜點', message):
         imagemap_message = ImagemapSendMessage(
-            base_url=f'{server}/image/你的圖片.jpg',  # 图片的基本 URL，指向新品推薦的图片
-            alt_text='新品推薦',  # 当图片无法显示时的替代文本
+            base_url=f'{server}/image/richMenu.jpg',  # 图片的基本 URL，指向新品推薦的图片
+            alt_text='**巧克力慕斯** - NT$180  滑順的巧克力慕斯，濃郁的巧克力風味與絲滑口感相得益彰。',  # 当图片无法显示时的替代文本
             base_size=BaseSize(height=1040, width=1040), 
             actions=[
                 MessageImagemapAction(
-                    text='新品推薦介紹',  # 点击后发送的消息文本
+                    text='熱門甜點介紹',  # 点击后发送的消息文本
                     area=ImagemapArea(
                         x=520, y=0, width=1040, height=1040 
                     )
@@ -73,12 +73,12 @@ def handle_message(event):
 
     elif re.match('菜單資訊', message):
         imagemap_message = ImagemapSendMessage(
-            base_url=f'{server}/image/你的圖片.jpg',  # 图片的基本 URL，指向新品推薦的图片
-            alt_text='新品推薦',  # 当图片无法显示时的替代文本
+            base_url=f'{server}/image/richMenu.jpg',  # 图片的基本 URL，指向新品推薦的图片
+            alt_text='1.**草莓奶油蛋糕** - NT$150  新鮮草莓搭配香濃奶油，輕盈的蛋糕層次口感，讓你一口接一口。 2. **巧克力慕斯** - NT$180  滑順的巧克力慕斯，濃郁的巧克力風味與絲滑口感相得益彰。 3. **芒果椰漿布丁** - NT$120  以芒果和椰漿製作的清爽布丁，帶來熱帶風情的口感。 4. **檸檬塔** - NT$130 酸甜檸檬餡搭配酥脆塔皮，清爽的口感讓你每一口都充滿驚喜',  # 当图片无法显示时的替代文本
             base_size=BaseSize(height=1040, width=1040), 
             actions=[
                 MessageImagemapAction(
-                    text='新品推薦介紹',  # 点击后发送的消息文本
+                    text='菜單資訊介紹',  # 点击后发送的消息文本
                     area=ImagemapArea(
                         x=520, y=0, width=1040, height=1040 
                     )
