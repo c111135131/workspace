@@ -43,21 +43,18 @@ def init_database():
             );
         ''')
 
-        # 創建觸發器自動生成 OrderId
+        # 自動生成 OrderId 的方法
         cursor.execute('''
             CREATE TRIGGER IF NOT EXISTS GenerateOrderId
-            BEFORE INSERT ON orders
+            AFTER INSERT ON orders
             FOR EACH ROW
-            WHEN NEW.OrderId IS NULL
             BEGIN
-                -- 更新 CurrentId
+                -- 更新序列值
                 UPDATE OrderIdSequence SET CurrentId = CurrentId + 1;
-                
-                -- 獲取新的 OrderId
-                SELECT 'ORD' || CurrentId FROM OrderIdSequence;
-                
-                -- 將生成的 OrderId 賦值給 NEW.OrderId
-                UPDATE orders SET OrderId = 'ORD' || (SELECT CurrentId FROM OrderIdSequence) WHERE rowid = NEW.rowid;
+                -- 更新插入記錄的 OrderId
+                UPDATE orders
+                SET OrderId = 'ORD' || (SELECT CurrentId FROM OrderIdSequence)
+                WHERE rowid = NEW.rowid;
             END;
         ''')
 
