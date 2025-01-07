@@ -4,7 +4,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
 from client import handle_client_message
 from admin import handle_admin_command
-from database import init_database  # 匯入資料庫初始化函數
+from database import init_database  # 匯入資料庫初始化
 from dotenv import load_dotenv
 import os
 from utils import handle_postback
